@@ -7654,6 +7654,7 @@ function setup() {
 	canvas.addEventListener('paste', handlePaste);
 
 	if (localStorage.getItem("5beam_id")) loggedInExploreUser5beamID = localStorage.getItem("5beam_id");
+	if (localStorage.getItem("5beam_auth")) getCurrentExploreUserID();
 
 	if (levelId) {
 		// If the level ID is specified in the URL, load that level.
@@ -10751,8 +10752,21 @@ function getCurrentExploreUserID() {
 	// from zelo: despite the pb_auth cookie having this information, we cannot use it as it is httpOnly
 	return fetch("https://5beam.zelo.dev/api/profile", {method: "GET", headers: getAuthHeader()})
 		.then(async response => {
-			loggedInExploreUser5beamID = (await response.json()).id;
+			if (!response.ok) {
+				if (response.status === 401) logOutExplore();
+				return;
+			}
+			const profile = await response.json();
+			loggedInExploreUser5beamID = profile.id;
 			localStorage.setItem("5beam_id", loggedInExploreUser5beamID);
+			// important! 5beam refreshes the token on every profile request!
+			if (profile.token) {
+				const auth = JSON.parse(localStorage.getItem('5beam_auth'));
+				if (auth) {
+					auth.token = profile.token;
+					localStorage.setItem('5beam_auth', JSON.stringify(auth));
+				}
+			}
 		})
 		.catch(err => {
 			console.log(err);
