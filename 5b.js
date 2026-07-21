@@ -1,4 +1,3 @@
-
 /* For testing the performance of any block of code. It averages every 100 runs and prints to the console. To use, simply place the following around the code block you'd like to test:
 performanceTest(()=>{
 }); */
@@ -2864,7 +2863,7 @@ function drawLevelButton(text, x, y, id, color) {
 		}
 		if (!mouseIsDown && levelButtonClicked === id) {
 			levelButtonClicked = -1;
-			if (id <= levelProgress) { // || (id > 99 && id < bonusProgress + 100)
+			if (id <= levelProgress && !onRect(lastClickX, lastClickY, 587, 469, menu2_3ButtonSize.w, menu2_3ButtonSize.h)) {
 				playLevel(id);
 				whiteAlpha = 100;
 			}
