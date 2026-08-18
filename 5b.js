@@ -4067,7 +4067,7 @@ function addTileMovieClip(x, y, context) {
 		}
 	} else if (t == 6) {
 		// Door
-		let bgid = playMode == 2 ? selectedBg : bgs[currentLevel];
+		let bgid = playMode == 2 || playMode == 3 ? selectedBg : bgs[currentLevel];
 		context.fillStyle = bgid == 9 || bgid == 10 ? '#999999' : '#505050';
 		context.fillRect((x - 1) * 30, (y - 3) * 30, 60, 120);
 		for (let i = 0; i < charCount2; i++) {
