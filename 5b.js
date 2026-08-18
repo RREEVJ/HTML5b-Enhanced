@@ -1991,6 +1991,7 @@ let rightPress = false;
 let recover = false;
 let recover2 = 0;
 let recoverTimer = 0;
+let HPRC1 = 0;
 let HPRC2 = 0;
 let cornerHangTimer = 0;
 let goal = 0;
@@ -2133,6 +2134,9 @@ let svgTileBorders = new Array(38);
 let svgChars = new Array(charD.length);
 let svgBodyParts = new Array(63);
 let svgHPRCBubble = new Array(5);
+let svg5beamStars;
+let svg5beamPlays;
+let svg5beamLevels;
 let svgCSBubble;
 let svgHPRCCrank;
 let svgCoin;
@@ -4523,7 +4527,7 @@ function verticalProp(i, sign, prop, x, y) {
 		return true;
 	}
 	if (prop >= 4 && prop <= 7) {
-		for (j = Math.floor((x - char[i].w) / 30); j <= Math.floor((x + char[i].w - 0.01) / 30); j++) {
+		for (let j = Math.floor((x - char[i].w) / 30); j <= Math.floor((x + char[i].w - 0.01) / 30); j++) {
 			if (!outOfRange(j, yTile)) {
 				if (blockProperties[thisLevel[yTile][j]][prop - 4] && !blockProperties[thisLevel[yTile][j]][prop]) {
 					return false;
@@ -4531,7 +4535,7 @@ function verticalProp(i, sign, prop, x, y) {
 			}
 		}
 	}
-	for (j = Math.floor((x - char[i].w) / 30); j <= Math.floor((x + char[i].w - 0.01) / 30); j++) {
+	for (let j = Math.floor((x - char[i].w) / 30); j <= Math.floor((x + char[i].w - 0.01) / 30); j++) {
 		if (!outOfRange(j, yTile)) {
 			if (blockProperties[thisLevel[yTile][j]][prop]) {
 				if (prop != 1 || !ifCarried(i) || allSolid(thisLevel[yTile][j])) {
@@ -4561,7 +4565,7 @@ function horizontalProp(i, sign, prop, x, y) {
 			}
 		}
 	}
-	for (j = Math.floor((y - char[i].h) / 30); j <= Math.floor((y - 0.01) / 30); j++) {
+	for (let j = Math.floor((y - char[i].h) / 30); j <= Math.floor((y - 0.01) / 30); j++) {
 		if (!outOfRange(xTile, j)) {
 			if (blockProperties[thisLevel[j][xTile]][prop]) {
 				return true;
@@ -5015,7 +5019,7 @@ function swapDepths(i, jdep) {
 }
 
 function nextDeadPerson(i, dire) {
-	i2 = (i + dire + charCount) % charCount;
+	let i2 = (i + dire + charCount) % charCount;
 	while (char[i2].charState != 1) {
 		i2 = (i2 + dire + charCount) % charCount;
 	}
@@ -5277,7 +5281,7 @@ function drawLCTiles() {
 					y >= mouseGridY &&
 					y < mouseGridY + tileClipboard.length
 				) {
-					clipboardTileCandidate = tileClipboard[y - mouseGridY][x - mouseGridX];
+					let clipboardTileCandidate = tileClipboard[y - mouseGridY][x - mouseGridX];
 					if (!(_keysDown[18] && tile != 0) && clipboardTileCandidate != 0) {
 						tile = clipboardTileCandidate;
 						osctx5.globalAlpha = 0.5;
@@ -7450,7 +7454,7 @@ function mousedown(event) {
 						}
 					} else if (tool == 7) {
 						let x2 = ((_xmouse - (330 - (scale * levelWidth) / 2)) / scale) % 1;
-						sizeChange = 0;
+						let sizeChange = 0;
 						if (closeToEdgeX() || levelWidth >= 2) {
 							if (closeToEdgeX()) {
 								sizeChange = 1;
@@ -7464,7 +7468,7 @@ function mousedown(event) {
 							let x4 = 0;
 							for (let y3 = 0; y3 < levelHeight; y3++) {
 								myLevel[1][y3] = new Array(levelWidth);
-								x3 = 0;
+								let x3 = 0;
 								for (let x3 = 0; x3 < levelWidth; x3++) {
 									if (x3 < x2) {
 										x4 = x3;
@@ -7509,9 +7513,9 @@ function mouseup(event) {
 		if (tool < 2 && mouseOnGrid()) lcChangesMade = true;
 		if (!blockProperties[selectedTile][9]) {
 			if (tool == 2 && LCRect[0] != -1) {
-				y = Math.min(LCRect[1], LCRect[3]);
+				let y = Math.min(LCRect[1], LCRect[3]);
 				while (y <= Math.max(LCRect[1], LCRect[3])) {
-					x = Math.min(LCRect[0], LCRect[2]);
+					let x = Math.min(LCRect[0], LCRect[2]);
 					while (x <= Math.max(LCRect[0], LCRect[2])) {
 						myLevel[1][y][x] = selectedTile;
 						// levelCreator.tiles["tileX" + x + "Y" + y].gotoAndStop(selectedTile + 1);
@@ -7690,6 +7694,10 @@ function setup() {
 }
 
 function draw() {
+	let charDropdownY;
+	let x;
+	let y;
+	let j;
 	onButton = false;
 	hoverText = '';
 	onTextBox = false;
@@ -10466,8 +10474,9 @@ function draw() {
 
 					ctx.font = '18px Helvetica';
 					drawSimpleButton('Done', closeLevelpackDescriptionDialog, (cwidth - lcPopUpW) / 2 + 10, (cheight + lcPopUpH) / 2 - 40, 60, 30, 3, '#ffffff', '#00a0ff', '#40a0ff', '#40a0ff', {isOnPopUp:true});
-				}let lcPopUpW = 400;
-						let lcPopUpH = 150;
+				} else if (lcPopUpType == 2) {
+					let lcPopUpW = 400;
+					let lcPopUpH = 150;
 						ctx.fillStyle = '#eaeaea';
 						ctx.fillRect((cwidth - lcPopUpW) / 2, (cheight - lcPopUpH) / 2, lcPopUpW, lcPopUpH);
 
@@ -10542,6 +10551,7 @@ function draw() {
 								lcPopUp = false;
 							}
 						}
+					}
 			}
 
 			if (lcPopUpNextFrame) lcPopUp = true;
@@ -10805,7 +10815,7 @@ function getRandomLevels() {
 
 function logInExplore() {
 	loggedInExploreUser5beamID = -1;
-	newWindow = window.open(
+	let newWindow = window.open(
 		'https://5beam.zelo.dev/login/oauth?redirectURI=https://5beam.zelo.dev/login/callback/html5b',
 		'5beam Login',
 		'height=750,width=450'
@@ -10893,8 +10903,9 @@ async function postExploreModifyLevel(id, title, desc, difficulty, file) {
 async function postExploreStarLevel(id) {
 	requestAdded();
 
+	let response;
 	try {
-		const response = await fetch('https://5beam.zelo.dev/api/level/star?id=' + id, {method: 'POST', headers: getAuthHeader()});
+		response = await fetch('https://5beam.zelo.dev/api/level/star?id=' + id, {method: 'POST', headers: getAuthHeader()});
 		requestResolved();
 		return await response.json();
 	} catch (err) {
@@ -10908,8 +10919,9 @@ async function postExploreStarLevel(id) {
 async function postExploreStarLevelpack(id) {
 	requestAdded();
 
+	let response;
 	try {
-		const response = await fetch('https://5beam.zelo.dev/api/levelpack/star?id=' + id, {method: 'POST', headers: getAuthHeader()});
+		response = await fetch('https://5beam.zelo.dev/api/levelpack/star?id=' + id, {method: 'POST', headers: getAuthHeader()});
 		requestResolved();
 		return await response.json();
 	} catch (err) {
