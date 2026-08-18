@@ -10474,8 +10474,9 @@ function draw() {
 
 					ctx.font = '18px Helvetica';
 					drawSimpleButton('Done', closeLevelpackDescriptionDialog, (cwidth - lcPopUpW) / 2 + 10, (cheight + lcPopUpH) / 2 - 40, 60, 30, 3, '#ffffff', '#00a0ff', '#40a0ff', '#40a0ff', {isOnPopUp:true});
-				}let lcPopUpW = 400;
-						let lcPopUpH = 150;
+				} else if (lcPopUpType == 2) {
+					let lcPopUpW = 400;
+					let lcPopUpH = 150;
 						ctx.fillStyle = '#eaeaea';
 						ctx.fillRect((cwidth - lcPopUpW) / 2, (cheight - lcPopUpH) / 2, lcPopUpW, lcPopUpH);
 
@@ -10550,6 +10551,7 @@ function draw() {
 								lcPopUp = false;
 							}
 						}
+					}
 			}
 
 			if (lcPopUpNextFrame) lcPopUp = true;
