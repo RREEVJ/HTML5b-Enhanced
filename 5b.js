@@ -2826,14 +2826,14 @@ function drawMenu2_3Button(id, x, y, action) {
 		onButton = true;
 		if (mouseIsDown) {
 			fill = '#cccccc';
-			menu2_3ButtonClicked = id;
+			if (onRect(lastClickX, lastClickY, x, y, menu2_3ButtonSize.w, menu2_3ButtonSize.h)) menu2_3ButtonClicked = id;
 		}
 	} else {
 		ctx.globalAlpha = 0.5;
 	}
 	if (!mouseIsDown && menu2_3ButtonClicked === id) {
 		menu2_3ButtonClicked = -1;
-		action();
+		if (onRect(lastClickX, lastClickY, x, y, menu2_3ButtonSize.w, menu2_3ButtonSize.h)) action();
 	}
 	ctx.fillStyle = fill;
 
@@ -5522,7 +5522,7 @@ function removeLCTiles() {
 function updateLCtiles() {
 	// console.log('updateLCtiles');
 	// scale = getLCGridScale();
-	osctx3.clearRect(0, 0, osc3.width, osc3.height);
+	osctx3.clearRect(0, 0, osc3.width / pixelRatio, osc3.height / pixelRatio);
 	// let y = 0;
 	// while (y < levelHeight) {
 	// 	let x = 0;
@@ -9305,7 +9305,7 @@ function draw() {
 				updateLCtiles();
 			}
 
-			osctx5.clearRect(0, 0, osc5.width, osc5.height);
+			osctx5.clearRect(0, 0, osc5.width / pixelRatio, osc5.height / pixelRatio);
 			osctx5.save();
 			osctx5.translate(lcPan[0], lcPan[1]);
 			drawLCTiles();
