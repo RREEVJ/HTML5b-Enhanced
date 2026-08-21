@@ -2826,14 +2826,14 @@ function drawMenu2_3Button(id, x, y, action) {
 		onButton = true;
 		if (mouseIsDown) {
 			fill = '#cccccc';
-			menu2_3ButtonClicked = id;
+			if (onRect(lastClickX, lastClickY, x, y, menu2_3ButtonSize.w, menu2_3ButtonSize.h)) menu2_3ButtonClicked = id;
 		}
 	} else {
 		ctx.globalAlpha = 0.5;
 	}
 	if (!mouseIsDown && menu2_3ButtonClicked === id) {
 		menu2_3ButtonClicked = -1;
-		action();
+		if (onRect(lastClickX, lastClickY, x, y, menu2_3ButtonSize.w, menu2_3ButtonSize.h)) action();
 	}
 	ctx.fillStyle = fill;
 
