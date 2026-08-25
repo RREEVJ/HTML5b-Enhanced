@@ -110,7 +110,7 @@ let nextLevelpackId;
 let whiteAlpha = 0;
 let coinAlpha = 0;
 let searchParams = new URLSearchParams(window.location.href);
-let [levelId, levelpackId] = [searchParams.get("https://coppersalts.github.io/HTML5b/?level"), searchParams.get("https://coppersalts.github.io/HTML5b/?levelpack")]
+let [levelId, levelpackId] = [searchParams.get("level"), searchParams.get("levelpack")]
 const difficultyMap = [
 	["Unknown", "#e6e6e6"],
 	["Easy", "#85ff85"],
@@ -203,7 +203,7 @@ function getSavedLevels() {
 	}
 	lcSavedLevels = JSON.parse(bfdia5b.getItem('myLevels'));
 	nextLevelId = bfdia5b.getItem('nextLevelId');
-	if (nextLevelId == "NaN") {
+	if (isNaN(nextLevelId)) {
 		nextLevelId = 0;
 		bfdia5b.setItem('nextLevelId', nextLevelId);
 	}
@@ -2126,6 +2126,44 @@ function mapRange(value, min1, max1, min2, max2) {
 	return min2 + ((value - min1) / (max1 - min1)) * (max2 - min2);
 }
 
+// Viewport culling helper function to filter tiles
+function isInViewport(x, y, width = 30, height = 30) {
+	return x * 30 + width > cameraX &&
+	       x * 30 < cameraX + 960 &&
+	       y * 30 + height > cameraY &&
+	       y * 30 < cameraY + 540;
+}
+
+// Cache SVG as bitmap on first render for static tiles
+function getSvgTileBitmap(tileId, frameIndex = 0) {
+	if (blockProperties[tileId][16] <= 1) {
+		// Single frame tile
+		if (!svgTilesBitmapCache[tileId]) {
+			let tmpCanvas = document.createElement('canvas');
+			tmpCanvas.width = svgTiles[tileId].width;
+			tmpCanvas.height = svgTiles[tileId].height;
+			let tmpCtx = tmpCanvas.getContext('2d');
+			tmpCtx.drawImage(svgTiles[tileId], 0, 0);
+			svgTilesBitmapCache[tileId] = tmpCanvas;
+		}
+		return svgTilesBitmapCache[tileId];
+	} else {
+		// Animated tile - cache each frame
+		if (!svgTilesBitmapCacheFrames[tileId]) {
+			svgTilesBitmapCacheFrames[tileId] = new Array(blockProperties[tileId][16]);
+		}
+		if (!svgTilesBitmapCacheFrames[tileId][frameIndex]) {
+			let tmpCanvas = document.createElement('canvas');
+			tmpCanvas.width = svgTiles[tileId][frameIndex].width;
+			tmpCanvas.height = svgTiles[tileId][frameIndex].height;
+			let tmpCtx = tmpCanvas.getContext('2d');
+			tmpCtx.drawImage(svgTiles[tileId][frameIndex], 0, 0);
+			svgTilesBitmapCacheFrames[tileId][frameIndex] = tmpCanvas;
+		}
+		return svgTilesBitmapCacheFrames[tileId][frameIndex];
+	}
+}
+
 let imgBgs = new Array(12);
 let svgTiles = new Array(blockProperties.length);
 let svgLevers = new Array(6);
@@ -2147,6 +2185,9 @@ let svgAcidDrop = new Array(9);
 let svgIceCubeMelt;
 let svgCharsVB = new Array(charD.length);
 let svgTilesVB = new Array(blockProperties.length);
+// Bitmap caches for SVG tiles to improve performance
+let svgTilesBitmapCache = new Array(blockProperties.length);
+let svgTilesBitmapCacheFrames = new Array(blockProperties.length);
 let svgMenu0;
 let svgMenu2;
 let svgMenu6;
@@ -3453,21 +3494,27 @@ function drawLevelBG() {
 function drawLevel(context) {
 	// Draw Static tiles
 	context.drawImage(osc1, 0, 0, osc1.width / pixelRatio, osc1.height / pixelRatio);
-	// Draw Normal Animated Tiles
+	// Draw Normal Animated Tiles - with viewport culling
 	for (let j = 0; j < tileDepths[1].length; j++) {
-		addTileMovieClip(tileDepths[1][j].x, tileDepths[1][j].y, context);
+		if (isInViewport(tileDepths[1][j].x, tileDepths[1][j].y)) {
+			addTileMovieClip(tileDepths[1][j].x, tileDepths[1][j].y, context);
+		}
 	}
 	// Draw Borders and Shadows
 	context.drawImage(osc2, 0, 0, osc2.width / pixelRatio, osc2.height / pixelRatio);
-	// Draw Active2 Switches & Buttons
+	// Draw Active2 Switches & Buttons - with viewport culling
 	for (let j = 0; j < tileDepths[2].length; j++) {
-		addTileMovieClip(tileDepths[2][j].x, tileDepths[2][j].y, context);
+		if (isInViewport(tileDepths[2][j].x, tileDepths[2][j].y)) {
+			addTileMovieClip(tileDepths[2][j].x, tileDepths[2][j].y, context);
+		}
 	}
 	// We draw the characters in here so we can layer liquids above them.
 	drawCharacters(context);
-	// Draw Liquids
+	// Draw Liquids - with viewport culling
 	for (let j = 0; j < tileDepths[3].length; j++) {
-		addTileMovieClip(tileDepths[3][j].x, tileDepths[3][j].y, context);
+		if (isInViewport(tileDepths[3][j].x, tileDepths[3][j].y)) {
+			addTileMovieClip(tileDepths[3][j].x, tileDepths[3][j].y, context);
+		}
 	}
 }
 
@@ -3475,6 +3522,9 @@ function drawCharacters(context) {
 	for (let d = 0; d < (charCount + 1) * 2; d++) {
 		let i = charDepths[d];
 		if (i < 0) continue;
+		// Skip characters far off-screen for performance
+		if (char[i].x < cameraX - 100 || char[i].x > cameraX + 1060 ||
+		    char[i].y < cameraY - 100 || char[i].y > cameraY + 640) continue;
 		let currCharID = char[i].id;
 		if (char[i].charState > 1 && typeof svgChars[currCharID] !== 'undefined') {
 			// Draw Burst
@@ -4036,17 +4086,13 @@ function addTileMovieClip(x, y, context) {
 				context.save();
 				context.translate(x * 30 + 15, y * 30 + 28);
 				context.rotate(tileFrames[y][x].rotation * (Math.PI / 180));
-				context.translate(-x * 30 - 15, -y * 30 - 28); // TODO: find out how to remove this line
+				context.translate(-x * 30 - 15, -y * 30 - 28);
 				context.drawImage(svgLevers[(blockProperties[t][11] - 1) % 6], x * 30, y * 30, svgLevers[0].width / scaleFactor, svgLevers[0].height / scaleFactor);
 				context.restore();
-				// Math.floor(blockProperties[t][11]/6);
-				// Math.floor(blockProperties[t][11]/6)
-				// context.fillStyle = '#505050';
-				// context.fillRect(x*30, y*30, 30, 30);
 			}
-			// context.fillStyle = '#cc33ff';
-			// context.fillRect(x*30, y*30, 30, 30);
-			context.drawImage(svgTiles[t], x * 30 + svgTilesVB[t][0], y * 30 + svgTilesVB[t][1], svgTiles[t].width / scaleFactor, svgTiles[t].height / scaleFactor);
+			// Use cached bitmap version for better performance
+			let cachedTile = getSvgTileBitmap(t);
+			context.drawImage(cachedTile, x * 30 + svgTilesVB[t][0], y * 30 + svgTilesVB[t][1], cachedTile.width / scaleFactor, cachedTile.height / scaleFactor);
 		} else if (blockProperties[t][16] > 1) {
 			let frame = 0;
 			if (blockProperties[t][17]) frame = blockProperties[t][18][_frameCount % blockProperties[t][18].length];
@@ -4058,12 +4104,11 @@ function addTileMovieClip(x, y, context) {
 					tileFrames[y][x].cf = 0;
 				}
 			}
-			// context.fillStyle = '#00ffcc';
-			// context.fillRect(x*30, y*30, 30, 30);
 			if (boundingBoxCheck(cameraX, cameraY, 960, 540, x * 30 + svgTilesVB[t][frame][0], y * 30 + svgTilesVB[t][frame][1], svgTilesVB[t][frame][2], svgTilesVB[t][frame][3])) {
-				context.drawImage(svgTiles[t][frame], x * 30 + svgTilesVB[t][frame][0], y * 30 + svgTilesVB[t][frame][1], svgTiles[t][frame].width / scaleFactor, svgTiles[t][frame].height / scaleFactor);
+				// Use cached bitmap version for animated tiles too
+				let cachedFrame = getSvgTileBitmap(t, frame);
+				context.drawImage(cachedFrame, x * 30 + svgTilesVB[t][frame][0], y * 30 + svgTilesVB[t][frame][1], cachedFrame.width / scaleFactor, cachedFrame.height / scaleFactor);
 			}
-			// context.drawImage(svgTiles[t][0], x*30, y*30);
 		}
 	} else if (t == 6) {
 		// Door
@@ -7604,6 +7649,37 @@ function handlePaste(e) {
 	//canvas.setAttribute('contenteditable', true);
 }
 
+function initMobileControls() {
+	const mobileControls = document.getElementById('mobile-controls');
+	mobileControls.classList.add('visible');
+	
+	document.querySelectorAll('.dpad-btn, .action-btn').forEach(button => {
+		button.addEventListener('touchstart', (e) => {
+			e.preventDefault();
+			const keyCode = parseInt(button.dataset.key);
+			_keysDown[keyCode] = true;
+		});
+		
+		button.addEventListener('touchend', (e) => {
+			e.preventDefault();
+			const keyCode = parseInt(button.dataset.key);
+			_keysDown[keyCode] = false;
+		});
+		
+		button.addEventListener('mousedown', (e) => {
+			e.preventDefault();
+			const keyCode = parseInt(button.dataset.key);
+			_keysDown[keyCode] = true;
+		});
+		
+		button.addEventListener('mouseup', (e) => {
+			e.preventDefault();
+			const keyCode = parseInt(button.dataset.key);
+			_keysDown[keyCode] = false;
+		});
+	});
+}
+
 function setup() {
 	osc1 = document.createElement('canvas');
 	osc1.width = cwidth;
@@ -7653,6 +7729,7 @@ function setup() {
 		window.addEventListener('touchend', touchend);
 		window.addEventListener('touchcancel', touchcancel);
 		window.addEventListener('touchmove', touchmove);
+		initMobileControls();
 	}
 	canvas.addEventListener('paste', handlePaste);
 

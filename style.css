@@ -1,4 +1,5 @@
 /* taken from the original page at bfdi.tv/5b */
+/* with some modifications to make it more mobile-friendly */
 * {
 	font-family: Helvetica, Arial, sans-serif;
 	text-align: center;
@@ -62,4 +63,84 @@ p{
 	image-rendering: pixelated;
 	image-rendering: crisp-edges;
 	-ms-interpolation-mode: nearest-neighbor;
+}
+
+#mobile-controls {
+	display: none;
+	position: fixed;
+	bottom: 20px;
+	left: 20px;
+	right: 20px;
+	z-index: 1000;
+	pointer-events: auto;
+}
+
+#mobile-controls.visible {
+	display: flex;
+	gap: 20px;
+	justify-content: space-between;
+}
+
+#dpad {
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+	align-items: center;
+}
+
+#dpad-horizontal {
+	display: flex;
+	gap: 5px;
+}
+
+.dpad-btn {
+	width: 50px;
+	height: 50px;
+	font-size: 24px;
+	border: 2px solid #333;
+	background-color: #ccc;
+	border-radius: 8px;
+	cursor: pointer;
+	touch-action: none;
+	user-select: none;
+	font-weight: bold;
+	transition: background-color 0.1s;
+}
+
+.dpad-btn:active {
+	background-color: #999;
+	transform: scale(0.95);
+}
+
+#action-buttons {
+	display: flex;
+	gap: 10px;
+	flex: 1;
+	justify-content: flex-end;
+}
+
+.action-btn {
+	padding: 12px 20px;
+	font-size: 14px;
+	border: 2px solid #333;
+	background-color: #ff7070;
+	border-radius: 8px;
+	cursor: pointer;
+	touch-action: none;
+	user-select: none;
+	font-weight: bold;
+	color: white;
+	transition: background-color 0.1s;
+	white-space: nowrap;
+}
+
+.action-btn:active {
+	background-color: #cc3333;
+	transform: scale(0.95);
+}
+
+@media (max-width: 768px) {
+	#mobile-controls.visible {
+		display: flex;
+	}
 }
