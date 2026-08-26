@@ -17,7 +17,7 @@ A lot of the code in here I didn't write. Since actionscript is so similar to ja
 - Added isInViewport() helper function
 - Added getSvgTileBitmap() for tile bitmap caching
 ### Mobile Controls
-- Added on-screen D-pad buttons for mobile users
-- Buttons include: Move Left/Right/Up/Down, Jump, Swap Character, Reset Level
+- Added on-screen joystick and buttons for mobile users
+- Buttons include: Jump, Swap Character, Reset Level
 - Controls automatically appear on mobile/touch devices
 - Buttons support both touch and mouse input
