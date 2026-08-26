@@ -7653,7 +7653,125 @@ function initMobileControls() {
 	const mobileControls = document.getElementById('mobile-controls');
 	mobileControls.classList.add('visible');
 	
-	document.querySelectorAll('.dpad-btn, .action-btn').forEach(button => {
+	const joystickCanvas = document.getElementById('joystick-canvas');
+	const ctx = joystickCanvas.getContext('2d');
+	const centerX = joystickCanvas.width / 2;
+	const centerY = joystickCanvas.height / 2;
+	const maxRadius = 60;
+	const deadZone = 15;
+	
+	let isJoystickActive = false;
+	let joystickX = centerX;
+	let joystickY = centerY;
+	
+	function drawJoystick() {
+		ctx.clearRect(0, 0, joystickCanvas.width, joystickCanvas.height);
+		
+		// Draw outer circle
+		ctx.strokeStyle = '#333';
+		ctx.lineWidth = 2;
+		ctx.beginPath();
+		ctx.arc(centerX, centerY, maxRadius, 0, Math.PI * 2);
+		ctx.stroke();
+		
+		// Draw center circle
+		ctx.fillStyle = '#999';
+		ctx.beginPath();
+		ctx.arc(joystickX, joystickY, 25, 0, Math.PI * 2);
+		ctx.fill();
+	}
+	
+	function handleJoystickInput(x, y) {
+		const dx = x - centerX;
+		const dy = y - centerY;
+		const distance = Math.sqrt(dx * dx + dy * dy);
+		
+		if (distance < deadZone) {
+			joystickX = centerX;
+			joystickY = centerY;
+			_keysDown[37] = false;
+			_keysDown[39] = false;
+			_keysDown[32] = false;
+		} else {
+			const angle = Math.atan2(dy, dx);
+			const constrainedDistance = Math.min(distance, maxRadius);
+			joystickX = centerX + Math.cos(angle) * constrainedDistance;
+			joystickY = centerY + Math.sin(angle) * constrainedDistance;
+			
+			// Determine direction
+			_keysDown[37] = false;
+			_keysDown[39] = false;
+			_keysDown[32] = false;
+			
+			// Check for up (jump)
+			if (dy < -distance * 0.5) _keysDown[32] = true;
+			
+			// Check for left
+			if (dx < -distance * 0.5) _keysDown[37] = true;
+			
+			// Check for right
+			if (dx > distance * 0.5) _keysDown[39] = true;
+		}
+		
+		drawJoystick();
+	}
+	
+	function resetJoystick() {
+		isJoystickActive = false;
+		joystickX = centerX;
+		joystickY = centerY;
+		_keysDown[37] = false;
+		_keysDown[39] = false;
+		_keysDown[32] = false;
+		drawJoystick();
+	}
+	
+	joystickCanvas.addEventListener('touchstart', (e) => {
+		e.preventDefault();
+		isJoystickActive = true;
+		const touch = e.touches[0];
+		const rect = joystickCanvas.getBoundingClientRect();
+		handleJoystickInput(touch.clientX - rect.left, touch.clientY - rect.top);
+	});
+	
+	joystickCanvas.addEventListener('touchmove', (e) => {
+		e.preventDefault();
+		if (isJoystickActive) {
+			const touch = e.touches[0];
+			const rect = joystickCanvas.getBoundingClientRect();
+			handleJoystickInput(touch.clientX - rect.left, touch.clientY - rect.top);
+		}
+	});
+	
+	joystickCanvas.addEventListener('touchend', (e) => {
+		e.preventDefault();
+		resetJoystick();
+	});
+	
+	joystickCanvas.addEventListener('mousedown', (e) => {
+		e.preventDefault();
+		isJoystickActive = true;
+		const rect = joystickCanvas.getBoundingClientRect();
+		handleJoystickInput(e.clientX - rect.left, e.clientY - rect.top);
+	});
+	
+	document.addEventListener('mousemove', (e) => {
+		if (isJoystickActive) {
+			const rect = joystickCanvas.getBoundingClientRect();
+			const x = e.clientX - rect.left;
+			const y = e.clientY - rect.top;
+			if (x >= 0 && x <= joystickCanvas.width && y >= 0 && y <= joystickCanvas.height) {
+				handleJoystickInput(x, y);
+			}
+		}
+	});
+	
+	document.addEventListener('mouseup', (e) => {
+		resetJoystick();
+	});
+	
+	// Action buttons
+	document.querySelectorAll('.action-btn').forEach(button => {
 		button.addEventListener('touchstart', (e) => {
 			e.preventDefault();
 			const keyCode = parseInt(button.dataset.key);
@@ -7678,6 +7796,8 @@ function initMobileControls() {
 			_keysDown[keyCode] = false;
 		});
 	});
+	
+	drawJoystick();
 }
 
 function setup() {

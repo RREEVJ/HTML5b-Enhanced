@@ -22,17 +22,11 @@
 	<p class="bottomtext">An HTML5 port of Cary Huang's <a href="https://bfdi.tv/5b/">BFDIA 5b</a>. Explore is powered by <a href="https://5beam.zelo.dev/">Zelo101's 5beam.</a>. Enhanced 1.0</p>
 </div>
 <div id="mobile-controls">
-	<div id="dpad">
-		<button id="btn-up" class="dpad-btn" data-key="38">↑</button>
-		<div id="dpad-horizontal">
-			<button id="btn-left" class="dpad-btn" data-key="37">←</button>
-			<button id="btn-right" class="dpad-btn" data-key="39">→</button>
-		</div>
-		<button id="btn-down" class="dpad-btn" data-key="40">↓</button>
-	</div>
+	<canvas id="joystick-canvas" width="150" height="150"></canvas>
 	<div id="action-buttons">
-		<button id="btn-jump" class="action-btn" data-key="32">JUMP</button>
-		<button id="btn-switch" class="action-btn" data-key="90">SWAP</button>
+		<button id="btn-pickup" class="action-btn" data-key="38">PICKUP</button>
+		<button id="btn-throw" class="action-btn" data-key="40">THROW</button>
+		<button id="btn-swap" class="action-btn" data-key="90">SWAP</button>
 		<button id="btn-reset" class="action-btn" data-key="82">RESET</button>
 		<button id="btn-enter" class="action-btn" data-key="13">ENTER</button>
 	</div>

@@ -79,37 +79,19 @@ p{
 	display: flex;
 	gap: 20px;
 	justify-content: space-between;
+	align-items: flex-end;
 }
 
-#dpad {
-	display: flex;
-	flex-direction: column;
-	gap: 5px;
-	align-items: center;
-}
-
-#dpad-horizontal {
-	display: flex;
-	gap: 5px;
-}
-
-.dpad-btn {
-	width: 50px;
-	height: 50px;
-	font-size: 24px;
+#joystick-canvas {
 	border: 2px solid #333;
-	background-color: #ccc;
-	border-radius: 8px;
-	cursor: pointer;
+	background-color: #e8e8e8;
+	border-radius: 10px;
 	touch-action: none;
-	user-select: none;
-	font-weight: bold;
-	transition: background-color 0.1s;
+	cursor: grab;
 }
 
-.dpad-btn:active {
-	background-color: #999;
-	transform: scale(0.95);
+#joystick-canvas:active {
+	cursor: grabbing;
 }
 
 #action-buttons {
@@ -117,6 +99,7 @@ p{
 	gap: 10px;
 	flex: 1;
 	justify-content: flex-end;
+	flex-wrap: wrap;
 }
 
 .action-btn {
