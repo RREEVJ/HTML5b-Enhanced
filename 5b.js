@@ -4167,8 +4167,8 @@ function calculateShadowsAndBorders() {
 						}
 					}
 				} else if (t >= 110 && t <= 129) {
-					for (let x2 = 0; x2 < 3; x2++) {
-						for (let y2 = 0; y2 < 2; y2++) {
+					for (let x2 = 0; x2 < 3 && x - x2 >= 0; x2++) {
+						for (let y2 = 0; y2 < 2 && y - y2 >= 0; y2++) {
 							setAmbientShadow(x - x2, y - y2);
 						}
 					}
